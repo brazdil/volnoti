@@ -2,8 +2,6 @@
 #include <unistd.h>
 #include <glib.h>
 #include <dbus/dbus-glib.h>
-#include <gtk/gtk.h>
-#include <sys/time.h>
 
 #include "common.h"
 #include "gopt.h"
@@ -11,9 +9,6 @@
 typedef struct {
     GObject parent;
     gint volume;
-    glong last_called;
-
-    GtkWindow *win;
 } VolumeObject;
 
 typedef struct {
