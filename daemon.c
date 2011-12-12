@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "common-defs.h"
+#include "gopt.h"
 
 typedef struct {
 	GObject parent;
@@ -83,13 +84,14 @@ static void printDebugOK(int debug) {
         g_print(" OK\n");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
 
-#ifdef DEBUG
-    int debug = TRUE;
-#else
-    int debug = FALSE;
-#endif
+	void *options = gopt_sort( & argc, argv, gopt_start(
+			gopt_option( 'h', 0, gopt_shorts( 'h', '?' ), gopt_longs( "help", "HELP" )),
+			gopt_option( 'z', 0, gopt_shorts( 0 ), gopt_longs( "version" )),
+			gopt_option( 'v', GOPT_REPEAT, gopt_shorts( 'v' ), gopt_longs( "verbose" ))));
+
+	int debug = gopt(options, 'v');
 
     DBusGConnection *bus = NULL;
     DBusGProxy *busProxy = NULL;

@@ -23,7 +23,7 @@ LDFLAGS := $(PKG_LDFLAGS) $(LDFLAGS)
 cleanfiles := value-client-stub.h \
               value-daemon-stub.h
 
-targets = volnoti
+targets = daemon client
 
 .PHONY: all clean checkxml
 all: $(targets)
@@ -35,20 +35,23 @@ all: $(targets)
 # NOTE: You could actually collapse the compilation and linking phases
 #       together, but this arrangement is much more common.
 
-volnoti: daemon.o
+daemon: daemon.o gopt.o
 	 $(CC) $^ -o $@ $(LDFLAGS)
 
-client: client.o
+client: client.o gopt.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 # The server and client depend on the respective implementation source
 # files, but also on the common interface as well as the generated
 # stub interfaces.
-daemon.o: daemon.c common-defs.h value-daemon-stub.h
+daemon.o: daemon.c common-defs.h value-daemon-stub.h gopt.h
 	$(CC) $(CFLAGS) -DPROGNAME=\"$(basename $@)\" -c $< -o $@
 
-client.o: client.c common-defs.h value-client-stub.h
+client.o: client.c common-defs.h value-client-stub.h gopt.h
 	$(CC) $(CFLAGS) -DPROGNAME=\"$(basename $@)\" -c $< -o $@
+
+gopt.o: gopt.c gopt.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # If the interface XML changes, the respective stub interfaces will be
 # automatically regenerated. Normally this would also mean that your
