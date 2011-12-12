@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/uk/ac/cam/db538/VolumeNotifications">
+  <interface name="uk.ac.cam.db538.VolumeNotification">
+    <method name="notify">
+      <arg type="i" name="volume" direction="in" />
+    </method>
+  </interface>
+</node>
