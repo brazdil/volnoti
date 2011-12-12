@@ -71,15 +71,29 @@ gboolean volume_object_notify(VolumeObject* obj,
     return TRUE;
 }
 
-int main(int argc, const char* argv[]) {
+static void printUsage(const char* filename, int failure) {
+    g_print("Usage: %s [-v] [-n]\n"
+    		" -h\t--help\t\thelp\n"
+    		" -v\t--verbose\tverbose\n"
+    		" -n\t--no-daemon\tdo not daemonize\n");
+    if (failure)
+    	exit(EXIT_FAILURE);
+    else
+    	exit(EXIT_SUCCESS);
+}
 
+int main(int argc, const char* argv[]) {
     void *options = gopt_sort(&argc, argv, gopt_start(
             gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
             gopt_option('n', 0, gopt_shorts('n'), gopt_longs("no-daemon")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
+    int help = gopt(options, 'h');
     int debug = gopt(options, 'v');
     int no_daemon = gopt(options, 'n');
     gopt_free(options);
+
+    if (help)
+    	printUsage(argv[0], FALSE);
 
     DBusGConnection *bus = NULL;
     DBusGProxy *busProxy = NULL;
