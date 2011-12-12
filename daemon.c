@@ -75,9 +75,10 @@ int main(int argc, const char* argv[]) {
 
     void *options = gopt_sort(&argc, argv, gopt_start(
             gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
-            gopt_option('z', 0, gopt_shorts(0), gopt_longs("version")),
+            gopt_option('n', 0, gopt_shorts('n'), gopt_longs("no-daemon")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
     int debug = gopt(options, 'v');
+    int no_daemon = gopt(options, 'n');
     gopt_free(options);
 
     DBusGConnection *bus = NULL;
@@ -153,6 +154,13 @@ int main(int argc, const char* argv[]) {
                                         VALUE_SERVICE_OBJECT_PATH,
                                         G_OBJECT(status));
     printDebugOK(debug);
+
+    // daemonize
+    if (!no_daemon) {
+        printDebug("Daemonizing...\n", debug);
+		if (daemon(0, 0) != 0)
+			handleError("failed to daemonize", "unknown", FALSE);
+    }
 
     // Run forever
     printDebug("Running the main loop...\n", debug);
