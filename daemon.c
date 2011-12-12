@@ -3,12 +3,12 @@
 #include <dbus/dbus-glib.h>
 #include <unistd.h>
 
-#include "common-defs.h"
+#include "common.h"
 #include "gopt.h"
 
 typedef struct {
-	GObject parent;
-	gint volume;
+    GObject parent;
+    gint volume;
 } VolumeObject;
 
 typedef struct {
@@ -17,11 +17,11 @@ typedef struct {
 
 GType volume_object_get_type(void);
 gboolean volume_object_notify(VolumeObject* obj,
-		                      gint value_in,
-		                      GError** error);
+                              gint value_in,
+                              GError** error);
 
 #define VOLUME_TYPE_OBJECT \
-		(volume_object_get_type())
+        (volume_object_get_type())
 #define VOLUME_OBJECT(object) \
         (G_TYPE_CHECK_INSTANCE_CAST ((object), \
          VOLUME_TYPE_OBJECT, VolumeObject))
@@ -43,58 +43,46 @@ G_DEFINE_TYPE(VolumeObject, volume_object, G_TYPE_OBJECT)
 #include "value-daemon-stub.h"
 
 static void volume_object_init(VolumeObject* obj) {
-	g_assert(obj != NULL);
-	obj->volume = 100;
+    g_assert(obj != NULL);
+    obj->volume = 100;
 }
 
 static void volume_object_class_init(VolumeObjectClass* klass) {
-	g_assert(klass != NULL);
+    g_assert(klass != NULL);
+
+    dbus_g_object_type_install_info(VOLUME_TYPE_OBJECT,
+                                    &dbus_glib_volume_object_object_info);
 }
 
 gboolean volume_object_notify(VolumeObject* obj,
-		                      gint value,
+                              gint value,
                               GError** error) {
-	g_assert(obj != NULL);
+    g_assert(obj != NULL);
 
-	if (value > 100)
-		value = 100;
-	if (value < -1)
-		value = -1;
+    if (value > 100)
+        value = 100;
+    if (value < -1)
+        value = -1;
 
-	obj->volume = value;
+    obj->volume = value;
 
-	g_print("Notify %d\n", obj->volume);
+    g_print("Notify %d\n", obj->volume);
 
-	return TRUE;
-}
-
-static void handleError(const char* msg, const char* reason, gboolean fatal) {
-    g_printerr("ERROR: %s (%s)\n", msg, reason);
-    if (fatal)
-        exit(EXIT_FAILURE);
-}
-
-static void printDebug(const gchar *msg, int debug) {
-    if (debug)
-        g_print("%s", msg);
-}
-
-static void printDebugOK(int debug) {
-    if (debug)
-        g_print(" OK\n");
+    return TRUE;
 }
 
 int main(int argc, const char* argv[]) {
 
-	void *options = gopt_sort( & argc, argv, gopt_start(
-			gopt_option( 'h', 0, gopt_shorts( 'h', '?' ), gopt_longs( "help", "HELP" )),
-			gopt_option( 'z', 0, gopt_shorts( 0 ), gopt_longs( "version" )),
-			gopt_option( 'v', GOPT_REPEAT, gopt_shorts( 'v' ), gopt_longs( "verbose" ))));
-
-	int debug = gopt(options, 'v');
+    void *options = gopt_sort(&argc, argv, gopt_start(
+            gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
+            gopt_option('z', 0, gopt_shorts(0), gopt_longs("version")),
+            gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
+    int debug = gopt(options, 'v');
+    gopt_free(options);
 
     DBusGConnection *bus = NULL;
     DBusGProxy *busProxy = NULL;
+    VolumeObject *status = NULL;
     GMainLoop *mainLoop = NULL;
     GError *error = NULL;
     guint result;
@@ -143,12 +131,27 @@ int main(int argc, const char* argv[]) {
                            G_TYPE_UINT,
                            &result,
                            G_TYPE_INVALID))
-    	handleError("D-Bus.RequestName RPC failed",
-    		      error->message,
+        handleError("D-Bus.RequestName RPC failed",
+                  error->message,
                   TRUE);
     if (result != 1)
-    	handleError("Failed to get the primary well-known name.",
+        handleError("Failed to get the primary well-known name.",
                     "RequestName result != 1", TRUE);
+    printDebugOK(debug);
+
+    // create the Volume object
+    printDebug("Creating volume object...", debug);
+    status = g_object_new(VOLUME_TYPE_OBJECT, NULL);
+    if (status == NULL)
+        handleError("Failed to create one VolumeObject instance.",
+                    "Unknown(OOM?)", TRUE);
+    printDebugOK(debug);
+
+    // register the Volume object
+    printDebug("Registering volume object...", debug);
+    dbus_g_connection_register_g_object(bus,
+                                        VALUE_SERVICE_OBJECT_PATH,
+                                        G_OBJECT(status));
     printDebugOK(debug);
 
     // Run forever
