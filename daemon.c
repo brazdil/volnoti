@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <glib.h>
 #include <dbus/dbus-glib.h>
+#include <gtk/gtk.h>
 
 #include "common.h"
 #include "gopt.h"
