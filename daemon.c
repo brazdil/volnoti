@@ -11,6 +11,7 @@ typedef struct {
     GObject parent;
     gint volume;
     GtkWindow *notification;
+    gint time_left;
 } VolumeObject;
 
 typedef struct {
@@ -48,6 +49,7 @@ static void volume_object_init(VolumeObject* obj) {
     g_assert(obj != NULL);
     obj->volume = 100;
     obj->notification = NULL;
+    obj->time_left = 0;
 }
 
 static void volume_object_class_init(VolumeObjectClass* klass) {
@@ -55,6 +57,22 @@ static void volume_object_class_init(VolumeObjectClass* klass) {
 
     dbus_g_object_type_install_info(VOLUME_TYPE_OBJECT,
                                     &dbus_glib_volume_object_object_info);
+}
+
+static gboolean
+time_handler(VolumeObject *obj)
+{
+	g_print("timer: %d\n", obj->time_left);
+
+	obj->time_left--;
+
+	if (obj->time_left < 0) {
+		destroy_notification(obj->notification);
+		obj->notification = NULL;
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 gboolean volume_object_notify(VolumeObject* obj,
@@ -74,10 +92,12 @@ gboolean volume_object_notify(VolumeObject* obj,
     if (obj->notification == NULL) {
     	obj->notification = create_notification();
         gtk_widget_realize(GTK_WIDGET(obj->notification));
+        g_timeout_add(1000, (GSourceFunc) time_handler, (gpointer) obj);
 //        move_notification(GTK_WINDOW(obj->notification), 32, 32);
     }
 
-    gtk_widget_show(GTK_WIDGET(obj->notification));
+	obj->time_left = 5;
+    gtk_widget_show_all(GTK_WIDGET(obj->notification));
 
     return TRUE;
 }
