@@ -2,14 +2,15 @@
 #include <unistd.h>
 #include <glib.h>
 #include <dbus/dbus-glib.h>
-#include <gtk/gtk.h>
 
 #include "common.h"
 #include "gopt.h"
+#include "notification.h"
 
 typedef struct {
     GObject parent;
     gint volume;
+    GtkWindow *notification;
 } VolumeObject;
 
 typedef struct {
@@ -46,6 +47,7 @@ G_DEFINE_TYPE(VolumeObject, volume_object, G_TYPE_OBJECT)
 static void volume_object_init(VolumeObject* obj) {
     g_assert(obj != NULL);
     obj->volume = 100;
+    obj->notification = NULL;
 }
 
 static void volume_object_class_init(VolumeObjectClass* klass) {
@@ -69,6 +71,14 @@ gboolean volume_object_notify(VolumeObject* obj,
 
     g_print("Notify %d\n", obj->volume);
 
+    if (obj->notification == NULL) {
+    	obj->notification = create_notification();
+        gtk_widget_realize(GTK_WIDGET(obj->notification));
+        move_notification(GTK_WINDOW(obj->notification), 32, 32);
+    }
+
+    gtk_widget_show(GTK_WIDGET(obj->notification));
+
     return TRUE;
 }
 
@@ -83,8 +93,8 @@ static void printUsage(const char* filename, int failure) {
     	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, const char* argv[]) {
-    void *options = gopt_sort(&argc, argv, gopt_start(
+int main(int argc, char* argv[]) {
+    void *options = gopt_sort(&argc, (const char**) argv, gopt_start(
             gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
             gopt_option('n', 0, gopt_shorts('n'), gopt_longs("no-daemon")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
@@ -103,8 +113,10 @@ int main(int argc, const char* argv[]) {
     GError *error = NULL;
     guint result;
 
-    // initialize GObject
+    // initialize GObject and GTK
     g_type_init();
+    g_log_set_always_fatal(G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL);
+    gtk_init(&argc, &argv);
 
     // create main loop
     mainLoop = g_main_loop_new(NULL, FALSE);

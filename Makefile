@@ -2,7 +2,7 @@
 interface_xml := specs.xml
 
 # Define a list of pkg-config packages we want to use
-pkg_packages := dbus-1 dbus-glib-1 gtk+-2.0
+pkg_packages := dbus-1 dbus-glib-1 gtk+-2.0 cairo
 
 PKG_CFLAGS  := $(shell pkg-config --cflags $(pkg_packages))
 PKG_LDFLAGS := $(shell pkg-config --libs $(pkg_packages))
@@ -35,7 +35,7 @@ all: $(targets)
 # NOTE: You could actually collapse the compilation and linking phases
 #       together, but this arrangement is much more common.
 
-daemon: daemon.o gopt.o common.o
+daemon: daemon.o gopt.o common.o notification.o
 	 $(CC) $^ -o $@ $(LDFLAGS)
 
 client: client.o gopt.o common.o
@@ -44,7 +44,7 @@ client: client.o gopt.o common.o
 # The server and client depend on the respective implementation source
 # files, but also on the common interface as well as the generated
 # stub interfaces.
-daemon.o: daemon.c common.h value-daemon-stub.h gopt.h
+daemon.o: daemon.c common.h value-daemon-stub.h gopt.h notification.h
 	$(CC) $(CFLAGS) -DPROGNAME=\"$(basename $@)\" -c $< -o $@
 
 client.o: client.c common.h value-client-stub.h gopt.h
@@ -54,6 +54,9 @@ gopt.o: gopt.c gopt.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 common.o: common.c common.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+notification.o: notification.c notification.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # If the interface XML changes, the respective stub interfaces will be
