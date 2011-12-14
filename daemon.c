@@ -62,11 +62,9 @@ static void volume_object_class_init(VolumeObjectClass* klass) {
 static gboolean
 time_handler(VolumeObject *obj)
 {
-	g_print("timer: %d\n", obj->time_left);
-
 	obj->time_left--;
 
-	if (obj->time_left < 0) {
+	if (obj->time_left <= 0) {
 		destroy_notification(obj->notification);
 		obj->notification = NULL;
 		return FALSE;
@@ -87,13 +85,10 @@ gboolean volume_object_notify(VolumeObject* obj,
 
     obj->volume = value;
 
-    g_print("Notify %d\n", obj->volume);
-
     if (obj->notification == NULL) {
     	obj->notification = create_notification();
         gtk_widget_realize(GTK_WIDGET(obj->notification));
         g_timeout_add(1000, (GSourceFunc) time_handler, (gpointer) obj);
-//        move_notification(GTK_WINDOW(obj->notification), 32, 32);
     }
 
 	obj->time_left = 5;
