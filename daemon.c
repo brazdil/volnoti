@@ -74,7 +74,7 @@ gboolean volume_object_notify(VolumeObject* obj,
     if (obj->notification == NULL) {
     	obj->notification = create_notification();
         gtk_widget_realize(GTK_WIDGET(obj->notification));
-        move_notification(GTK_WINDOW(obj->notification), 32, 32);
+//        move_notification(GTK_WINDOW(obj->notification), 32, 32);
     }
 
     gtk_widget_show(GTK_WIDGET(obj->notification));

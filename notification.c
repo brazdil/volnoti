@@ -381,6 +381,8 @@ GtkWindow* create_notification() {
     gtk_window_set_title(GTK_WINDOW (win), "Notification");
     gtk_window_set_type_hint(GTK_WINDOW (win),
                              GDK_WINDOW_TYPE_HINT_NOTIFICATION);
+    gtk_window_set_default_size(GTK_WINDOW(win), 400, 400);
+    gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
 
     g_object_set_data_full (G_OBJECT (win),
                             "windata", windata,
@@ -408,3 +410,7 @@ move_notification (GtkWindow *win, int x, int y) {
 	gtk_window_move(GTK_WINDOW(win), x, y);
 }
 
+void
+destroy_notification (GtkWindow *win) {
+	gtk_widget_destroy(GTK_WIDGET(win));
+}
