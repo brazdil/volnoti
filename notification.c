@@ -5,8 +5,9 @@
 #define WIDTH         		400
 #define DEFAULT_X0    		0
 #define DEFAULT_Y0    		0
-#define DEFAULT_RADIUS 		16
-#define BACKGROUND_ALPHA    0.90
+#define DEFAULT_RADIUS 		30
+#define DEFAULT_BORDER 		(2 * DEFAULT_RADIUS)
+#define BACKGROUND_ALPHA    0.50
 
 typedef struct {
 	GtkWidget *win;
@@ -400,7 +401,7 @@ GtkWindow* create_notification() {
                      windata);
     gtk_widget_show(main_vbox);
     gtk_container_add(GTK_CONTAINER(win), main_vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(main_vbox), 12);
+    gtk_container_set_border_width(GTK_CONTAINER(main_vbox), DEFAULT_BORDER);
 
     return GTK_WINDOW(win);
 }
