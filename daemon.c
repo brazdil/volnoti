@@ -12,6 +12,7 @@ typedef struct {
     gint volume;
     GtkWindow *notification;
     gint time_left;
+    gboolean debug;
 } VolumeObject;
 
 typedef struct {
@@ -62,7 +63,9 @@ static void volume_object_class_init(VolumeObjectClass* klass) {
 static gboolean
 time_handler(VolumeObject *obj)
 {
-	obj->time_left--;
+    g_assert(obj != NULL);
+
+    obj->time_left--;
 
 	if (obj->time_left <= 0) {
 		destroy_notification(obj->notification);
@@ -83,6 +86,7 @@ gboolean volume_object_notify(VolumeObject* obj,
     if (value < -1)
         value = -1;
 
+
     obj->volume = value;
 
     if (obj->notification == NULL) {
@@ -97,7 +101,7 @@ gboolean volume_object_notify(VolumeObject* obj,
     return TRUE;
 }
 
-static void printUsage(const char* filename, int failure) {
+static void print_usage(const char* filename, int failure) {
     g_print("Usage: %s [-v] [-n]\n"
     		" -h\t--help\t\thelp\n"
     		" -v\t--verbose\tverbose\n"
@@ -119,12 +123,12 @@ int main(int argc, char* argv[]) {
     gopt_free(options);
 
     if (help)
-    	printUsage(argv[0], FALSE);
+    	print_usage(argv[0], FALSE);
 
     DBusGConnection *bus = NULL;
-    DBusGProxy *busProxy = NULL;
+    DBusGProxy *bus_proxy = NULL;
     VolumeObject *status = NULL;
-    GMainLoop *mainLoop = NULL;
+    GMainLoop *main_loop = NULL;
     GError *error = NULL;
     guint result;
 
@@ -134,34 +138,34 @@ int main(int argc, char* argv[]) {
     gtk_init(&argc, &argv);
 
     // create main loop
-    mainLoop = g_main_loop_new(NULL, FALSE);
-    if (mainLoop == NULL)
-        handleError("Couldn't create GMainLoop", "Unknown(OOM?)", TRUE);
+    main_loop = g_main_loop_new(NULL, FALSE);
+    if (main_loop == NULL)
+        handle_error("Couldn't create GMainLoop", "Unknown(OOM?)", TRUE);
     
     // connect to D-Bus
-    printDebug("Connecting to D-Bus...", debug);
+    print_debug("Connecting to D-Bus...", debug);
     bus = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
     if (error != NULL)
-        handleError("Couldn't connect to D-Bus",
+        handle_error("Couldn't connect to D-Bus",
                     error->message,
                     TRUE);
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
     // get the proxy
-    printDebug("Getting proxy...", debug);
-    busProxy = dbus_g_proxy_new_for_name(bus,
+    print_debug("Getting proxy...", debug);
+    bus_proxy = dbus_g_proxy_new_for_name(bus,
                                          DBUS_SERVICE_DBUS,
                                          DBUS_PATH_DBUS,
                                          DBUS_INTERFACE_DBUS);
-    if (busProxy == NULL)
-        handleError("Couldn't get a proxy for D-Bus",
+    if (bus_proxy == NULL)
+        handle_error("Couldn't get a proxy for D-Bus",
                     "Unknown(dbus_g_proxy_new_for_name)",
                     TRUE);
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
     // register the service
-    printDebug("Registering the service...", debug);
-    if (!dbus_g_proxy_call(busProxy,
+    print_debug("Registering the service...", debug);
+    if (!dbus_g_proxy_call(bus_proxy,
                            "RequestName",
                            &error,
 
@@ -174,38 +178,39 @@ int main(int argc, char* argv[]) {
                            G_TYPE_UINT,
                            &result,
                            G_TYPE_INVALID))
-        handleError("D-Bus.RequestName RPC failed",
+        handle_error("D-Bus.RequestName RPC failed",
                   error->message,
                   TRUE);
     if (result != 1)
-        handleError("Failed to get the primary well-known name.",
+        handle_error("Failed to get the primary well-known name.",
                     "RequestName result != 1", TRUE);
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
     // create the Volume object
-    printDebug("Creating volume object...", debug);
+    print_debug("Creating volume object...", debug);
     status = g_object_new(VOLUME_TYPE_OBJECT, NULL);
     if (status == NULL)
-        handleError("Failed to create one VolumeObject instance.",
+        handle_error("Failed to create one VolumeObject instance.",
                     "Unknown(OOM?)", TRUE);
-    printDebugOK(debug);
+    status->debug = debug;
+    print_debug_ok(debug);
 
     // register the Volume object
-    printDebug("Registering volume object...", debug);
+    print_debug("Registering volume object...", debug);
     dbus_g_connection_register_g_object(bus,
                                         VALUE_SERVICE_OBJECT_PATH,
                                         G_OBJECT(status));
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
     // daemonize
     if (!no_daemon) {
-        printDebug("Daemonizing...\n", debug);
+        print_debug("Daemonizing...\n", debug);
 		if (daemon(0, 0) != 0)
-			handleError("failed to daemonize", "unknown", FALSE);
+			handle_error("failed to daemonize", "unknown", FALSE);
     }
 
     // Run forever
-    printDebug("Running the main loop...\n", debug);
-    g_main_loop_run(mainLoop);
+    print_debug("Running the main loop...\n", debug);
+    g_main_loop_run(main_loop);
     return EXIT_FAILURE;
 }

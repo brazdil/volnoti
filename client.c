@@ -9,7 +9,7 @@
 
 #include "value-client-stub.h"
 
-static void printUsage(const char* filename, int failure) {
+static void print_usage(const char* filename, int failure) {
     g_print("Usage: %s [-v] [-m] <volume>\n"
     		" -h\t--help\t\thelp\n"
     		" -v\t--verbose\tverbose\n"
@@ -32,18 +32,18 @@ int main(int argc, const char* argv[]) {
     gopt_free(options);
 
     if (help)
-    	printUsage(argv[0], FALSE);
+    	print_usage(argv[0], FALSE);
 
     gint volume = -1;
     if (!muted) {
         if (argc != 2)
-            printUsage(argv[0], TRUE);
+        	print_usage(argv[0], TRUE);
 
         if (sscanf(argv[1], "%d", &volume) != 1)
-            printUsage(argv[0], TRUE);
+        	print_usage(argv[0], TRUE);
 
         if (volume > 100 || volume < 0)
-            printUsage(argv[0], TRUE);
+        	print_usage(argv[0], TRUE);
     }
 
     DBusGConnection *bus = NULL;
@@ -54,34 +54,34 @@ int main(int argc, const char* argv[]) {
     g_type_init();
 
     // connect to D-Bus
-    printDebug("Connecting to D-Bus...", debug);
+    print_debug("Connecting to D-Bus...", debug);
     bus = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
     if (error != NULL)
-        handleError("Couldn't connect to D-Bus",
+        handle_error("Couldn't connect to D-Bus",
                     error->message,
                     TRUE);
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
     // get the proxy
-    printDebug("Getting proxy...", debug);
+    print_debug("Getting proxy...", debug);
     proxy = dbus_g_proxy_new_for_name(bus,
                                       VALUE_SERVICE_NAME,
                                       VALUE_SERVICE_OBJECT_PATH,
                                       VALUE_SERVICE_INTERFACE);
     if (proxy == NULL)
-        handleError("Couldn't get a proxy for D-Bus",
+    	handle_error("Couldn't get a proxy for D-Bus",
                     "Unknown(dbus_g_proxy_new_for_name)",
                     TRUE);
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
-    printDebug("Sending volume...", debug);
+    print_debug("Sending volume...", debug);
     uk_ac_cam_db538_VolumeNotification_notify(proxy, volume, &error);
     if (error !=  NULL) {
-        handleError("Failed to send notification", error->message, FALSE);
+    	handle_error("Failed to send notification", error->message, FALSE);
         g_clear_error(&error);
         return EXIT_FAILURE;
     }
-    printDebugOK(debug);
+    print_debug_ok(debug);
 
     return EXIT_SUCCESS;
 }

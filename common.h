@@ -7,8 +7,8 @@
    This must match the entry in the interface definition XML. */
 #define VALUE_SERVICE_INTERFACE   "uk.ac.cam.db538.VolumeNotification"
 
-void handleError(const char* msg, const char* reason, gboolean fatal);
-void printDebug(const gchar *msg, int debug);
-void printDebugOK(int debug);
+void handle_error(const char* msg, const char* reason, gboolean fatal);
+void print_debug(const gchar *msg, int debug);
+void print_debug_ok(int debug);
 
 #endif

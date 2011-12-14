@@ -3,18 +3,18 @@
 
 #include "common.h"
 
-void handleError(const char* msg, const char* reason, gboolean fatal) {
+void handle_error(const char* msg, const char* reason, gboolean fatal) {
     g_printerr("ERROR: %s (%s)\n", msg, reason);
     if (fatal)
         exit(EXIT_FAILURE);
 }
 
-void printDebug(const gchar *msg, int debug) {
+void print_debug(const gchar *msg, int debug) {
     if (debug)
         g_print("%s", msg);
 }
 
-void printDebugOK(int debug) {
+void print_debug_ok(int debug) {
     if (debug)
         g_print(" OK\n");
 }
