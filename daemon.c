@@ -68,8 +68,10 @@ time_handler(VolumeObject *obj)
     obj->time_left--;
 
 	if (obj->time_left <= 0) {
+        print_debug("Destroying notification...", obj->debug);
 		destroy_notification(obj->notification);
 		obj->notification = NULL;
+		print_debug_ok(obj->debug);
 		return FALSE;
 	}
 
@@ -86,13 +88,14 @@ gboolean volume_object_notify(VolumeObject* obj,
     if (value < -1)
         value = -1;
 
-
     obj->volume = value;
 
     if (obj->notification == NULL) {
+        print_debug("Creating new notification...", obj->debug);
     	obj->notification = create_notification();
         gtk_widget_realize(GTK_WIDGET(obj->notification));
         g_timeout_add(1000, (GSourceFunc) time_handler, (gpointer) obj);
+        print_debug_ok(obj->debug);
     }
 
 	obj->time_left = 5;
@@ -105,7 +108,7 @@ static void print_usage(const char* filename, int failure) {
     g_print("Usage: %s [-v] [-n]\n"
     		" -h\t--help\t\thelp\n"
     		" -v\t--verbose\tverbose\n"
-    		" -n\t--no-daemon\tdo not daemonize\n");
+    		" -n\t--no-daemon\tdo not daemonize\n", filename);
     if (failure)
     	exit(EXIT_FAILURE);
     else
