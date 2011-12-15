@@ -17,6 +17,7 @@ typedef struct {
     GdkPixbuf *icon_off;
     GdkPixbuf *icon_muted;
     gint time_left;
+    gint timeout;
     gboolean debug;
 } VolumeObject;
 
@@ -53,9 +54,7 @@ G_DEFINE_TYPE(VolumeObject, volume_object, G_TYPE_OBJECT)
 
 static void volume_object_init(VolumeObject* obj) {
     g_assert(obj != NULL);
-    obj->volume = 100;
     obj->notification = NULL;
-    obj->time_left = 0;
 }
 
 static void volume_object_class_init(VolumeObjectClass* klass) {
@@ -114,17 +113,18 @@ gboolean volume_object_notify(VolumeObject* obj,
     else
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
 
-	obj->time_left = 5;
+	obj->time_left = obj->timeout;
     gtk_widget_show_all(GTK_WIDGET(obj->notification));
 
     return TRUE;
 }
 
 static void print_usage(const char* filename, int failure) {
-    g_print("Usage: %s [-v] [-n]\n"
-    		" -h\t--help\t\thelp\n"
-    		" -v\t--verbose\tverbose\n"
-    		" -n\t--no-daemon\tdo not daemonize\n", filename);
+    g_print("Usage: %s [-v] [-n] [-t <int>]\n"
+    		" -h\t\t--help\t\t\thelp\n"
+    		" -v\t\t--verbose\t\tverbose\n"
+    		" -t <int>\t--timeout <int>\t\tnotification timeout in seconds\n"
+    		" -n\t\t--no-daemon\t\tdo not daemonize\n", filename);
     if (failure)
     	exit(EXIT_FAILURE);
     else
@@ -135,10 +135,19 @@ int main(int argc, char* argv[]) {
     void *options = gopt_sort(&argc, (const char**) argv, gopt_start(
             gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
             gopt_option('n', 0, gopt_shorts('n'), gopt_longs("no-daemon")),
+            gopt_option('t', GOPT_ARG, gopt_shorts('t'), gopt_longs("timeout")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
+
     int help = gopt(options, 'h');
     int debug = gopt(options, 'v');
     int no_daemon = gopt(options, 'n');
+
+    int timeout = 3;
+    if (gopt(options, 't')) {
+        if (sscanf(gopt_arg_i(options, 't', 0), "%d", &timeout) != 1)
+        	print_usage(argv[0], TRUE);
+    }
+
     gopt_free(options);
 
     if (help)
@@ -213,6 +222,8 @@ int main(int argc, char* argv[]) {
                     "Unknown(OOM?)", TRUE);
 
     status->debug = debug;
+    status->timeout = timeout;
+
     GtkIconTheme *theme = gtk_icon_theme_get_default();
     if (theme == NULL)
         handle_error("Couldn't get the GTK+ theme.", "Unknown(OOM?)", TRUE);
