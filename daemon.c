@@ -11,18 +11,24 @@
 
 typedef struct {
     GObject parent;
+
     gint volume;
+    gboolean muted;
+
     GtkWindow *notification;
+
     GdkPixbuf *icon_high;
     GdkPixbuf *icon_medium;
     GdkPixbuf *icon_low;
     GdkPixbuf *icon_off;
     GdkPixbuf *icon_muted;
+
     GdkPixbuf *image_progressbar_empty;
     GdkPixbuf *image_progressbar_full;
     GdkPixbuf *image_progressbar;
     gint width_progressbar;
     gint height_progressbar;
+
     gint time_left;
     gint timeout;
     gboolean debug;
@@ -94,12 +100,13 @@ gboolean volume_object_notify(VolumeObject* obj,
                               GError** error) {
     g_assert(obj != NULL);
 
-    if (value > 100)
-        value = 100;
-    if (value < -1)
-        value = -1;
-
-    obj->volume = value;
+    if (value < 0) {
+		obj->muted = TRUE;
+		obj->volume = 0;
+	} else {
+    	obj->muted = FALSE;
+    	obj->volume = (value > 100) ? 100 : value;
+    }
 
     if (obj->notification == NULL) {
         print_debug("Creating new notification...", obj->debug);
@@ -110,16 +117,16 @@ gboolean volume_object_notify(VolumeObject* obj,
     }
 
     // choose icon
-    if (obj->volume >= 75)
+    if (obj->muted)
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
+    else if (obj->volume >= 75)
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_high);
     else if (obj->volume >= 50)
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_medium);
     else if (obj->volume >= 25)
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_low);
-    else if (obj->volume >= 0)
-    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_off);
     else
-    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_off);
 
     // prepare and set progress bar
     gint width_full = obj->width_progressbar * obj->volume / 100;
@@ -256,9 +263,9 @@ int main(int argc, char* argv[]) {
     status->icon_off = gtk_icon_theme_load_icon(theme, "audio-volume-off", 256, 0, &error);
     if (error != NULL)
         handle_error("Couldn't load audio-volume-off icon.", "Unknown(OOM?)", TRUE);
-    status->icon_muted = gtk_icon_theme_load_icon(theme, "audio-volume-muted", 256, 0, &error);
+    status->icon_muted = gtk_icon_theme_load_icon(theme, "audio-volume-muted-blocked-panel", 256, 0, &error);
     if (error != NULL)
-        handle_error("Couldn't load audio-volume-muted icon.", "Unknown(OOM?)", TRUE);
+        handle_error("Couldn't load audio-volume-muted-blocked-panel icon.", "Unknown(OOM?)", TRUE);
 
     // progress bar
     status->image_progressbar_empty = gdk_pixbuf_new_from_file(IMAGE_PATH "progressbar_empty.png", &error);
