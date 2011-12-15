@@ -2,7 +2,7 @@
 interface_xml := specs.xml
 
 # Define a list of pkg-config packages we want to use
-pkg_packages := dbus-1 dbus-glib-1 gtk+-2.0 cairo
+pkg_packages := dbus-1 dbus-glib-1 gtk+-2.0 cairo gdk-pixbuf-2.0
 
 PKG_CFLAGS  := $(shell pkg-config --cflags $(pkg_packages))
 PKG_LDFLAGS := $(shell pkg-config --libs $(pkg_packages))

@@ -11,6 +11,11 @@ typedef struct {
     GObject parent;
     gint volume;
     GtkWindow *notification;
+    GdkPixbuf *icon_high;
+    GdkPixbuf *icon_medium;
+    GdkPixbuf *icon_low;
+    GdkPixbuf *icon_off;
+    GdkPixbuf *icon_muted;
     gint time_left;
     gboolean debug;
 } VolumeObject;
@@ -97,6 +102,17 @@ gboolean volume_object_notify(VolumeObject* obj,
         g_timeout_add(1000, (GSourceFunc) time_handler, (gpointer) obj);
         print_debug_ok(obj->debug);
     }
+
+    if (obj->volume >= 75)
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_high);
+    else if (obj->volume >= 50)
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_medium);
+    else if (obj->volume >= 25)
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_low);
+    else if (obj->volume >= 0)
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_off);
+    else
+    	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
 
 	obj->time_left = 5;
     gtk_widget_show_all(GTK_WIDGET(obj->notification));
@@ -190,12 +206,32 @@ int main(int argc, char* argv[]) {
     print_debug_ok(debug);
 
     // create the Volume object
-    print_debug("Creating volume object...", debug);
+    print_debug("Preparing data...", debug);
     status = g_object_new(VOLUME_TYPE_OBJECT, NULL);
     if (status == NULL)
         handle_error("Failed to create one VolumeObject instance.",
                     "Unknown(OOM?)", TRUE);
+
     status->debug = debug;
+    GtkIconTheme *theme = gtk_icon_theme_get_default();
+    if (theme == NULL)
+        handle_error("Couldn't get the GTK+ theme.", "Unknown(OOM?)", TRUE);
+    status->icon_high = gtk_icon_theme_load_icon(theme, "audio-volume-high", 256, 0, &error);
+    if (error != NULL)
+        handle_error("Couldn't load audio-volume-high icon.", "Unknown(OOM?)", TRUE);
+    status->icon_medium = gtk_icon_theme_load_icon(theme, "audio-volume-medium", 256, 0, &error);
+    if (error != NULL)
+        handle_error("Couldn't load audio-volume-medium icon.", "Unknown(OOM?)", TRUE);
+    status->icon_low = gtk_icon_theme_load_icon(theme, "audio-volume-low", 256, 0, &error);
+    if (error != NULL)
+        handle_error("Couldn't load audio-volume-low icon.", "Unknown(OOM?)", TRUE);
+    status->icon_off = gtk_icon_theme_load_icon(theme, "audio-volume-off", 256, 0, &error);
+    if (error != NULL)
+        handle_error("Couldn't load audio-volume-off icon.", "Unknown(OOM?)", TRUE);
+    status->icon_muted = gtk_icon_theme_load_icon(theme, "audio-volume-muted", 256, 0, &error);
+    if (error != NULL)
+        handle_error("Couldn't load audio-volume-muted icon.", "Unknown(OOM?)", TRUE);
+
     print_debug_ok(debug);
 
     // register the Volume object
