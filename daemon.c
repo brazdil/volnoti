@@ -7,6 +7,8 @@
 #include "gopt.h"
 #include "notification.h"
 
+#define IMAGE_PATH 	 "./"	// "/usr/share/pixmaps/volume-notification/"
+
 typedef struct {
     GObject parent;
     gint volume;
@@ -16,6 +18,11 @@ typedef struct {
     GdkPixbuf *icon_low;
     GdkPixbuf *icon_off;
     GdkPixbuf *icon_muted;
+    GdkPixbuf *image_progressbar_empty;
+    GdkPixbuf *image_progressbar_full;
+    GdkPixbuf *image_progressbar;
+    gint width_progressbar;
+    gint height_progressbar;
     gint time_left;
     gint timeout;
     gboolean debug;
@@ -102,6 +109,7 @@ gboolean volume_object_notify(VolumeObject* obj,
         print_debug_ok(obj->debug);
     }
 
+    // choose icon
     if (obj->volume >= 75)
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_high);
     else if (obj->volume >= 50)
@@ -112,6 +120,14 @@ gboolean volume_object_notify(VolumeObject* obj,
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_off);
     else
     	set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
+
+    // prepare and set progress bar
+    gint width_full = obj->width_progressbar * obj->volume / 100;
+    gdk_pixbuf_copy_area(obj->image_progressbar_full, 0, 0, width_full, obj->height_progressbar,
+    					 obj->image_progressbar, 0, 0);
+    gdk_pixbuf_copy_area(obj->image_progressbar_empty, width_full, 0, obj->width_progressbar - width_full, obj->height_progressbar,
+    					 obj->image_progressbar, width_full, 0);
+    set_progressbar_image(GTK_WINDOW(obj->notification), obj->image_progressbar);
 
 	obj->time_left = obj->timeout;
     gtk_widget_show_all(GTK_WIDGET(obj->notification));
@@ -224,6 +240,7 @@ int main(int argc, char* argv[]) {
     status->debug = debug;
     status->timeout = timeout;
 
+    // volume icons
     GtkIconTheme *theme = gtk_icon_theme_get_default();
     if (theme == NULL)
         handle_error("Couldn't get the GTK+ theme.", "Unknown(OOM?)", TRUE);
@@ -242,6 +259,29 @@ int main(int argc, char* argv[]) {
     status->icon_muted = gtk_icon_theme_load_icon(theme, "audio-volume-muted", 256, 0, &error);
     if (error != NULL)
         handle_error("Couldn't load audio-volume-muted icon.", "Unknown(OOM?)", TRUE);
+
+    // progress bar
+    status->image_progressbar_empty = gdk_pixbuf_new_from_file(IMAGE_PATH "progressbar_empty.png", &error);
+    if (error != NULL)
+        handle_error("Couldn't load progressbar_empty.png file.", "Unknown(OOM?)", TRUE);
+    status->image_progressbar_full = gdk_pixbuf_new_from_file(IMAGE_PATH "progressbar_full.png", &error);
+    if (error != NULL)
+        handle_error("Couldn't load progressbar_empty.png file.", "Unknown(OOM?)", TRUE);
+
+    // check that the images are of the same size
+    if (gdk_pixbuf_get_width(status->image_progressbar_empty) != gdk_pixbuf_get_width(status->image_progressbar_full) ||
+    	gdk_pixbuf_get_height(status->image_progressbar_empty) != gdk_pixbuf_get_height(status->image_progressbar_full) ||
+    	gdk_pixbuf_get_bits_per_sample(status->image_progressbar_empty) != gdk_pixbuf_get_bits_per_sample(status->image_progressbar_full))
+        handle_error("Progress bar images aren't of the same size or don't have the same number of bits per sample.", "Unknown(OOM?)", TRUE);
+
+    // create pixbuf for combined image
+    status->width_progressbar = gdk_pixbuf_get_width(status->image_progressbar_empty);
+    status->height_progressbar = gdk_pixbuf_get_height(status->image_progressbar_empty);
+    status->image_progressbar = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
+    		                                   TRUE,
+    		                                   gdk_pixbuf_get_bits_per_sample(status->image_progressbar_empty),
+    		                                   status->width_progressbar,
+    		                                   status->height_progressbar);
 
     print_debug_ok(debug);
 

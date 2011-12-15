@@ -2,22 +2,26 @@
 
 #define USE_COMPOSITE
 
-#define WIDTH         		400
-#define DEFAULT_X0    		0
-#define DEFAULT_Y0    		0
-#define DEFAULT_RADIUS 		30
-#define DEFAULT_BORDER 		(2 * DEFAULT_RADIUS)
-#define BACKGROUND_ALPHA    0.50
+#define WIDTH         			400
+#define DEFAULT_X0    			0
+#define DEFAULT_Y0    			0
+#define DEFAULT_RADIUS 			30
+#define DEFAULT_BORDER 			(DEFAULT_RADIUS * 3 / 2)
+#define BACKGROUND_ALPHA    	0.50
 
-#define IMAGE_SIZE    96
-#define BODY_X_OFFSET (IMAGE_SIZE + 8)
-#define MAX_ICON_SIZE IMAGE_SIZE
+#define IMAGE_SIZE    			110
+#define IMAGE_PADDING			(IMAGE_SIZE / 3)
+#define BODY_X_OFFSET 			(IMAGE_SIZE + 8)
+#define MAX_ICON_SIZE 			IMAGE_SIZE
+#define MAX_PROGRESSBAR_SIZE 	(IMAGE_SIZE * 18 / 10)
 
 typedef struct {
 	GtkWidget *win;
 	GtkWidget *main_vbox;
 	GtkWidget *iconbox;
 	GtkWidget *icon;
+	GtkWidget *progressbarbox;
+	GtkWidget *progressbar;
 
 	int width;
 	int height;
@@ -457,17 +461,32 @@ GtkWindow* create_notification() {
     // icon box
     windata->iconbox = gtk_alignment_new (0.5f, 0, 0, 0);
     gtk_widget_show (windata->iconbox);
-//    gtk_alignment_set_padding (GTK_ALIGNMENT (windata->iconbox),
-//                               5, 0, 0, 0);
+    gtk_alignment_set_padding (GTK_ALIGNMENT (windata->iconbox),
+                               0, IMAGE_PADDING, 0, 0);
     gtk_box_pack_start (GTK_BOX (windata->main_vbox),
                         windata->iconbox,
                         FALSE, FALSE, 0);
     gtk_widget_set_size_request (windata->iconbox, BODY_X_OFFSET, -1);
 
+    // icon
     windata->icon = gtk_image_new ();
     gtk_widget_show (windata->icon);
     gtk_container_add (GTK_CONTAINER (windata->iconbox), windata->icon);
 
+    // progress bar box
+    windata->progressbarbox = gtk_alignment_new (0.5f, 0, 0, 0);
+    gtk_widget_show (windata->progressbarbox);
+//    gtk_alignment_set_padding (GTK_ALIGNMENT (windata->iconbox),
+//                               5, 0, 0, 0);
+    gtk_box_pack_start (GTK_BOX (windata->main_vbox),
+                        windata->progressbarbox,
+                        FALSE, FALSE, 0);
+    gtk_widget_set_size_request (windata->progressbarbox, BODY_X_OFFSET, -1);
+
+    // progress bar
+    windata->progressbar = gtk_image_new ();
+    gtk_widget_show (windata->progressbar);
+    gtk_container_add (GTK_CONTAINER (windata->progressbarbox), windata->progressbar);
 
     return GTK_WINDOW(win);
 }
@@ -511,6 +530,40 @@ set_notification_icon (GtkWindow *nw, GdkPixbuf *pixbuf) {
         } else {
                 gtk_widget_hide (windata->icon);
                 gtk_widget_set_size_request (windata->iconbox,
+                                             BODY_X_OFFSET,
+                                             -1);
+        }
+}
+
+void
+set_progressbar_image (GtkWindow *nw, GdkPixbuf *pixbuf) {
+        WindowData *windata;
+        GdkPixbuf  *scaled;
+
+        windata = g_object_get_data (G_OBJECT (nw), "windata");
+
+        g_assert (windata != NULL);
+
+        scaled = NULL;
+        if (pixbuf != NULL) {
+                scaled = scale_pixbuf (pixbuf,
+                		               MAX_PROGRESSBAR_SIZE,
+                		               MAX_PROGRESSBAR_SIZE,
+                                       TRUE);
+        }
+
+        gtk_image_set_from_pixbuf (GTK_IMAGE (windata->progressbar), scaled);
+
+        if (scaled != NULL) {
+                int pixbuf_width = gdk_pixbuf_get_width (scaled);
+
+                gtk_widget_show (windata->icon);
+                gtk_widget_set_size_request (windata->progressbarbox,
+                                             MAX (BODY_X_OFFSET, pixbuf_width), -1);
+                g_object_unref (scaled);
+        } else {
+                gtk_widget_hide (windata->icon);
+                gtk_widget_set_size_request (windata->progressbarbox,
                                              BODY_X_OFFSET,
                                              -1);
         }
