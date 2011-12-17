@@ -2,12 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+AC_INIT([volnoti], [0.1], [])
 AC_CONFIG_SRCDIR([src/daemon.c])
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
-AC_CONFIG_FILES([Makefile])
+# AC_CONFIG_FILES([Makefile])
 
 # Checks for programs.
 AC_PROG_CC
@@ -31,4 +31,8 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strchr strcspn])
 
-AC_OUTPUT
+AC_OUTPUT([
+  Makefile
+  src/Makefile
+  res/Makefile
+])

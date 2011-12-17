@@ -7,7 +7,7 @@
 #include "gopt.h"
 #include "notification.h"
 
-#define IMAGE_PATH 	 "./"	// "/usr/share/pixmaps/volume-notification/"
+#define IMAGE_PATH 	 PREFIX
 
 typedef struct {
     GObject parent;
