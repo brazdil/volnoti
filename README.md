@@ -52,7 +52,7 @@ Compilation from source archive
 Download the `.tar.gz` source archive from the GitHub page, and then
 extract its contents by calling:
 
-    $ tar xvzf volnoti-\*.tar.gz
+    $ tar xvzf volnoti-*.tar.gz
 
 Then just follow the basic GNU routine:
 
@@ -63,8 +63,40 @@ Then just follow the basic GNU routine:
 Running the application
 -----------------------
 
+Firstly, you need to running the daemon (add it to your startup 
+applications):
+
+    $ volnoti
+
+Consult the output of `volnoti --help` if you want to see debug output
+ot don't want the application to run as a daemon. You can also change
+some parameters of the notifications (like their duration time) through 
+the parameters of the daemon.
+
+Once the daemon is running, you can run for example:
+
+    $ volnoti-show 25
+    
+to show a notification for volume level 25%. To show a notification for
+muted sound, call:
+    
+    $ volnoti-show -m
+    
+The best way to do this is to create simple script and attach it to 
+the hot-keys on your keyboard. But this depends on your window manager
+and system configuration.
+
 Theming
 -------
+
+Some parameters of the notifications can be changed through the 
+parameters of the daemon. To learn more, run:
+    
+    $ volnoti --help
+
+All the images are stored in `/usr/share/pixmaps/volnoti` (depending
+on the chosen prefix during configuration phase) and it should be
+easy to replace them with your favourite icons.
 
 Credits
 -------
