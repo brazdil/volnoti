@@ -19,10 +19,10 @@ You need the following libraries to compile Volnoti yourself. Please
 install them through the package manager of your distribution, or follow
 installation instructions on the projects' websites.
 
- - [D-Bus](dbus.freedesktop.org)
- - [D-Bus Glib](dbus.freedesktop.org/releases/dbus-glib)
- - [GTK+ 2.0](www.gtk.org)
- - [GDK-Pixbuf 2.0](www.gtk.org)
+ - [D-Bus](http://dbus.freedesktop.org)
+ - [D-Bus Glib](http://dbus.freedesktop.org/releases/dbus-glib)
+ - [GTK+ 2.0](http://www.gtk.org)
+ - [GDK-Pixbuf 2.0](http://www.gtk.org)
  
 Compilation from Git
 --------------------
