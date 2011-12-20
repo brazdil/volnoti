@@ -15,15 +15,15 @@ is heavily based on the GNOME notification-daemon.
 Dependencies
 ------------
 
-You need the following libraries to compile CryptoSMS yourself. Please 
+You need the following libraries to compile Volnoti yourself. Please 
 install them through the package manager of your distribution, or follow
 installation instructions on the projects' websites.
 
- - [Android SDK](http://developer.android.com) 
-   with Android 2.3.3 (API 9) SDK Platform
- - [Apache Ant](http://ant.apache.org/)
- - [Leiningen](https://github.com/technomancy/leiningen)
-
+ - [D-Bus](dbus.freedesktop.org)
+ - [D-Bus Glib](dbus.freedesktop.org/releases/dbus-glib)
+ - [GTK+ 2.0](www.gtk.org)
+ - [GDK-Pixbuf 2.0](www.gtk.org)
+ 
 Compilation from Git
 --------------------
 
@@ -102,3 +102,6 @@ easy to replace them with your favourite icons.
 Credits
 -------
 
+ - Faenza Icon Set (tiheum.deviantart.com)
+ - Notification-daemon (www.gnome.org)
+ - Gopt (www.purposeful.co.uk/software/gopt)
