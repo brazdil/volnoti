@@ -1,0 +1,31 @@
+# Maintainer: David Brazdil <db538@cam.ac.uk>
+pkgname=volnoti
+pkgver=0.1
+pkgrel=1
+pkgdesc="Lightweight volume notification"
+url="https://www.github.com/davidbrazdil/volnoti"
+arch=('x86_64' 'i686')
+license=('GPLv3')
+depends=('dbus-core' 'dbus-glib' 'gtk2' 'gdk-pixbuf2')
+makedepends=('gcc' 'make' 'pkg-config')
+conflicts=()
+replaces=()
+backup=()
+# install='foo.install'
+source=("http://github.com/downloads/volnoti/${pkgname}-${pkgver}.tar.gz")
+md5sums=('b4c8d0845c89b5912ad6d6f10026a7df')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
+
+# vim:set ts=2 sw=2 et:
+
