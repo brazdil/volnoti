@@ -23,7 +23,11 @@ installation instructions on the projects' websites.
  - [D-Bus Glib](http://dbus.freedesktop.org/releases/dbus-glib)
  - [GTK+ 2.0](http://www.gtk.org)
  - [GDK-Pixbuf 2.0](http://www.gtk.org)
- 
+
+You can compile it with standard `GCC`, with `make` and `pkg-config` 
+installed, and you will need `autoconf` and `automake` if you choose 
+to compile the Git version.
+
 Compilation from Git
 --------------------
 
