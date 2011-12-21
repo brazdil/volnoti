@@ -1,5 +1,8 @@
 /**
  *  Volnoti - Lightweight Volume Notification
+
+ *  Copyright (C) 2006-2007 Christian Hammond <chipx86@chipx86.com>
+ *  Copyright (C) 2009 Red Hat, Inc.
  *  Copyright (C) 2011  David Brazdil <db538@cam.ac.uk>
  *
  *  This program is free software: you can redistribute it and/or modify
