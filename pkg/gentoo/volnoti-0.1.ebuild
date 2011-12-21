@@ -4,10 +4,11 @@
 
 EAPI=4
 
-inherit toolchain-funcs multilib
+inherit toolchain-funcs
 
 SLOT="0"
 MY_P="${PN}-${PV}"
+IUSE=""
 
 DESCRIPTION="Lightweight volume notification"
 HOMEPAGE="https://github.com/davidbrazdil/volnoti"
