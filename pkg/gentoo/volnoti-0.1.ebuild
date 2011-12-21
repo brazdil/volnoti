@@ -11,7 +11,7 @@ MY_P="${PN}-${PV}"
 
 DESCRIPTION="Lightweight volume notification"
 HOMEPAGE="https://github.com/davidbrazdil/volnoti"
-SRC_URI="https://github.com/downloads/davidbrazdil/volnoti/${MY_P}.tar.gz"
+SRC_URI="mirror://github/davidbrazdil/volnoti/${MY_P}.tar.gz"
 
 LICENSE="GPL-3"
 KEYWORDS="~amd64 ~x86"
