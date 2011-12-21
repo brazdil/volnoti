@@ -1,7 +1,7 @@
 # Maintainer: David Brazdil <db538@cam.ac.uk>
 pkgname=volnoti
 pkgver=0.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Lightweight volume notification"
 url="https://www.github.com/davidbrazdil/volnoti"
 arch=('x86_64' 'i686')
@@ -13,7 +13,7 @@ replaces=()
 backup=()
 # install='foo.install'
 source=("http://github.com/downloads/volnoti/${pkgname}-${pkgver}.tar.gz")
-md5sums=('b4c8d0845c89b5912ad6d6f10026a7df')
+md5sums=('f1e7a3730528b8808228415990d398f9')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
