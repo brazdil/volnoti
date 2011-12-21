@@ -12,6 +12,11 @@ or XMonad. It is known to work with a wide range of WMs, including
 GNOME, KDE, Xfce, LXDE, XMonad, i3 and many others. The source code
 is heavily based on the GNOME notification-daemon.
 
+Binary packages
+---------------
+
+ - Arch Linux - available in [AUR](https://aur.archlinux.org/packages.php?ID=55159)
+
 Dependencies
 ------------
 
