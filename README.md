@@ -13,6 +13,7 @@ Binary packages
 ---------------
 
  - Arch Linux - available in [AUR](https://aur.archlinux.org/packages.php?ID=55159)
+ - Gentoo - [ebuild](https://bugs.gentoo.org/show_bug.cgi?id=395595) in Bugzilla
 
 Dependencies
 ------------
