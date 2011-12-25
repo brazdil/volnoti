@@ -50,7 +50,7 @@ typedef struct {
     gint time_left;
     gint timeout;
     gboolean debug;
-    NotificationProperties properties;
+    Settings settings;
 } VolumeObject;
 
 typedef struct {
@@ -129,7 +129,7 @@ gboolean volume_object_notify(VolumeObject* obj,
 
     if (obj->notification == NULL) {
         print_debug("Creating new notification...", obj->debug);
-        obj->notification = create_notification(obj->properties);
+        obj->notification = create_notification(obj->settings);
         gtk_widget_realize(GTK_WIDGET(obj->notification));
         g_timeout_add(1000, (GSourceFunc) time_handler, (gpointer) obj);
         print_debug_ok(obj->debug);
@@ -162,12 +162,17 @@ gboolean volume_object_notify(VolumeObject* obj,
 }
 
 static void print_usage(const char* filename, int failure) {
-    g_print("Usage: %s [-v] [-n] [-t <int>]\n"
+    Settings settings = get_default_settings();
+    g_print("Usage: %s [arguments]\n"
             " -h\t\t--help\t\t\thelp\n"
             " -v\t\t--verbose\t\tverbose\n"
+            " -n\t\t--no-daemon\t\tdo not daemonize\n"
+            "\n"
+            "Configuration:\n"
             " -t <int>\t--timeout <int>\t\tnotification timeout in seconds\n"
-            " -a <float>\t--alpha <float>\t\ttransparency level (0.0 - 1.0, default 0.5)\n"
-            " -n\t\t--no-daemon\t\tdo not daemonize\n", filename);
+            " -a <float>\t--alpha <float>\t\ttransparency level (0.0 - 1.0, default %.2f)\n"
+            " -r <int>\t--corner-radius <int>\tradius of the round corners in pixels (default %d)\n"
+            , filename, settings.alpha, settings.corner_radius);
     if (failure)
         exit(EXIT_FAILURE);
     else
@@ -175,28 +180,33 @@ static void print_usage(const char* filename, int failure) {
 }
 
 int main(int argc, char* argv[]) {
-    NotificationProperties properties;
+    Settings settings = get_default_settings();
+    int timeout = 3;
     
     void *options = gopt_sort(&argc, (const char**) argv, gopt_start(
             gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
             gopt_option('n', 0, gopt_shorts('n'), gopt_longs("no-daemon")),
             gopt_option('t', GOPT_ARG, gopt_shorts('t'), gopt_longs("timeout")),
             gopt_option('a', GOPT_ARG, gopt_shorts('a'), gopt_longs("alpha")),
+            gopt_option('r', GOPT_ARG, gopt_shorts('r'), gopt_longs("corner-radius")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
 
     int help = gopt(options, 'h');
     int debug = gopt(options, 'v');
     int no_daemon = gopt(options, 'n');
 
-    int timeout = 3;
     if (gopt(options, 't')) {
         if (sscanf(gopt_arg_i(options, 't', 0), "%d", &timeout) != 1)
             print_usage(argv[0], TRUE);
     }
     
-    properties.alpha = 0.5f;
     if (gopt(options, 'a')) {
-        if (sscanf(gopt_arg_i(options, 'a', 0), "%f", &properties.alpha) != 1 || properties.alpha < 0.0f || properties.alpha > 1.0f)
+        if (sscanf(gopt_arg_i(options, 'a', 0), "%f", &settings.alpha) != 1 || settings.alpha < 0.0f || settings.alpha > 1.0f)
+            print_usage(argv[0], TRUE);
+    }
+
+    if (gopt(options, 'r')) {
+        if (sscanf(gopt_arg_i(options, 'r', 0), "%d", &settings.corner_radius) != 1)
             print_usage(argv[0], TRUE);
     }
 
@@ -275,7 +285,7 @@ int main(int argc, char* argv[]) {
 
     status->debug = debug;
     status->timeout = timeout;
-    status->properties = properties;
+    status->settings = settings;
 
     // volume icons
     status->icon_high = gdk_pixbuf_new_from_file(IMAGE_PATH "volume_high.svg", &error);

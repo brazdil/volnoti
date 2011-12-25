@@ -25,10 +25,11 @@
 
 typedef struct {
     gfloat alpha;
-    gint timeout;
-} NotificationProperties;
+    gint corner_radius;
+} Settings;
 
-GtkWindow* create_notification(NotificationProperties properties);
+Settings get_default_settings();
+GtkWindow* create_notification(Settings settings);
 void move_notification(GtkWindow *win, int x, int y);
 void set_notification_icon(GtkWindow *nw, GdkPixbuf *pixbuf);
 void set_progressbar_image (GtkWindow *nw, GdkPixbuf *pixbuf);

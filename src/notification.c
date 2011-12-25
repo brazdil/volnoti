@@ -49,8 +49,16 @@ typedef struct {
     int last_height;
 
     gboolean composited;
-    NotificationProperties properties;
+    Settings settings;
 } WindowData;
+
+Settings
+get_default_settings() {
+    Settings settings;
+    settings.alpha = 0.5f;
+    settings.corner_radius = 30;
+    return settings;
+}
 
 static void
 color_reverse(const GdkColor *a, GdkColor *b) {
@@ -199,7 +207,7 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
                      1.0f,
                      DEFAULT_X0 + 1,
                      DEFAULT_Y0 + 1,
-                     DEFAULT_RADIUS,
+                     windata->settings.corner_radius,
                      widget->allocation.width - 2,
                      widget->allocation.height - 2);
 
@@ -207,7 +215,7 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
     r = (float)color.red / 65535.0;
     g = (float)color.green / 65535.0;
     b = (float)color.blue / 65535.0;
-    cairo_set_source_rgba (cr, r, g, b, windata->properties.alpha);
+    cairo_set_source_rgba (cr, r, g, b, windata->settings.alpha);
     cairo_fill_preserve (cr);
 
     // border
@@ -261,7 +269,7 @@ update_shape(WindowData *windata) {
                              1.0f,
                              DEFAULT_X0,
                              DEFAULT_Y0,
-                             DEFAULT_RADIUS,
+                             windata->settings.corner_radius,
                              windata->width,
                              windata->height);
             cairo_fill (cr);
@@ -391,7 +399,7 @@ on_window_map (GtkWidget  *widget, GdkEvent   *event, WindowData *windata) {
     return FALSE;
 }
 
-GtkWindow* create_notification(NotificationProperties properties) {
+GtkWindow* create_notification(Settings settings) {
     WindowData *windata;
 
     GtkWidget   *win;
@@ -409,7 +417,7 @@ GtkWindow* create_notification(NotificationProperties properties) {
     gtk_window_set_resizable(GTK_WINDOW (win), FALSE);
     gtk_widget_set_app_paintable(win, TRUE);
     windata->win = win;
-    windata->properties = properties;
+    windata->settings = settings;
 
     // connect signals
     g_signal_connect (G_OBJECT (win),
