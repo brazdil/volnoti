@@ -28,7 +28,6 @@
 #define DEFAULT_Y0              0
 #define DEFAULT_RADIUS          30
 #define DEFAULT_BORDER          (DEFAULT_RADIUS * 3 / 2)
-#define BACKGROUND_ALPHA        0.50
 
 #define IMAGE_SIZE              110
 #define IMAGE_PADDING           (IMAGE_SIZE / 3)
@@ -50,7 +49,7 @@ typedef struct {
     int last_height;
 
     gboolean composited;
-    glong timeout;
+    NotificationProperties properties;
 } WindowData;
 
 static void
@@ -208,11 +207,8 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
     r = (float)color.red / 65535.0;
     g = (float)color.green / 65535.0;
     b = (float)color.blue / 65535.0;
-    cairo_set_source_rgba (cr, r, g, b, BACKGROUND_ALPHA);
+    cairo_set_source_rgba (cr, r, g, b, windata->properties.alpha);
     cairo_fill_preserve (cr);
-
-    /* Should we show urgency somehow?  Probably doesn't
-     * have any meaningful value to the user... */
 
     // border
 //  color = widget->style->text_aa [GTK_STATE_NORMAL];
@@ -395,7 +391,7 @@ on_window_map (GtkWidget  *widget, GdkEvent   *event, WindowData *windata) {
     return FALSE;
 }
 
-GtkWindow* create_notification() {
+GtkWindow* create_notification(NotificationProperties properties) {
     WindowData *windata;
 
     GtkWidget   *win;
@@ -413,6 +409,7 @@ GtkWindow* create_notification() {
     gtk_window_set_resizable(GTK_WINDOW (win), FALSE);
     gtk_widget_set_app_paintable(win, TRUE);
     windata->win = win;
+    windata->properties = properties;
 
     // connect signals
     g_signal_connect (G_OBJECT (win),

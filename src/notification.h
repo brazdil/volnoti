@@ -23,7 +23,12 @@
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-GtkWindow* create_notification();
+typedef struct {
+    gfloat alpha;
+    gint timeout;
+} NotificationProperties;
+
+GtkWindow* create_notification(NotificationProperties properties);
 void move_notification(GtkWindow *win, int x, int y);
 void set_notification_icon(GtkWindow *nw, GdkPixbuf *pixbuf);
 void set_progressbar_image (GtkWindow *nw, GdkPixbuf *pixbuf);
