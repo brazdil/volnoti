@@ -60,6 +60,7 @@ typedef struct {
 GType volume_object_get_type(void);
 gboolean volume_object_notify(VolumeObject* obj,
                               gint value_in,
+                              gboolean muted,
                               GError** error);
 
 #define VOLUME_TYPE_OBJECT \
@@ -116,16 +117,16 @@ time_handler(VolumeObject *obj)
 
 gboolean volume_object_notify(VolumeObject* obj,
                               gint value,
+                              gboolean muted,
                               GError** error) {
     g_assert(obj != NULL);
 
-    if (value < 0) {
+    if (muted) {
         obj->muted = TRUE;
-        obj->volume = 0;
     } else {
         obj->muted = FALSE;
-        obj->volume = (value > 100) ? 100 : value;
     }
+    obj->volume = (value > 100) ? 100 : value;
 
     if (obj->notification == NULL) {
         print_debug("Creating new notification...", obj->debug);
