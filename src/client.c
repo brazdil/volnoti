@@ -31,7 +31,7 @@ static void print_usage(const char* filename, int failure) {
     g_print("Usage: %s [-v] [-m] <volume>\n"
             " -h\t--help\t\thelp\n"
             " -v\t--verbose\tverbose\n"
-            " -m\t--mute\t\tmuted [<volume>\t\tint 0-100]\n"
+            " -m\t--mute\t\tmuted\n"
             " <volume>\t\tint 0-100\n", filename);
     if (failure)
         exit(EXIT_FAILURE);
