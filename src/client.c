@@ -31,7 +31,7 @@ static void print_usage(const char* filename, int failure) {
     g_print("Usage: %s [-v] [-m] <volume>\n"
             " -h\t--help\t\thelp\n"
             " -v\t--verbose\tverbose\n"
-            " -m\t--mute\t\tmuted\n"
+            " -m\t--mute\t\tmuted [<volume>\t\tint 0-100]\n"
             " <volume>\t\tint 0-100\n", filename);
     if (failure)
         exit(EXIT_FAILURE);
@@ -52,8 +52,20 @@ int main(int argc, const char* argv[]) {
     if (help)
         print_usage(argv[0], FALSE);
 
-    gint volume = -1;
-    if (!muted) {
+    gint volume;
+    if (muted) {
+        if (argc > 2) {
+            print_usage(argv[0], TRUE);
+        } else if (argc == 2) {
+            if (sscanf(argv[1], "%d", &volume) != 1)
+                print_usage(argv[0], TRUE);
+
+            if (volume > 100 || volume < 0)
+                print_usage(argv[0], TRUE);
+        } else {
+            volume = 0;
+        }
+    } else {
         if (argc != 2)
             print_usage(argv[0], TRUE);
 
@@ -93,7 +105,7 @@ int main(int argc, const char* argv[]) {
     print_debug_ok(debug);
 
     print_debug("Sending volume...", debug);
-    uk_ac_cam_db538_VolumeNotification_notify(proxy, volume, &error);
+    uk_ac_cam_db538_VolumeNotification_notify(proxy, volume, muted, &error);
     if (error !=  NULL) {
         handle_error("Failed to send notification", error->message, FALSE);
         g_clear_error(&error);
