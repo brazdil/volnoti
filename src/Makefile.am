@@ -32,6 +32,9 @@ volnoti_show_LDADD = \
 
 interface_xml = specs.xml
 
+BUILT_SOURCES = value-daemon-stub.h value-client-stub.h 
+CLEANFILES = $(BUILT_SOURCES)
+
 value-daemon-stub.h: $(interface_xml)
 	dbus-binding-tool --prefix=volume_object --mode=glib-server \
 	  $< > $@
