@@ -26,10 +26,10 @@ static
 inline
 #endif
 gboolean
-uk_ac_cam_db538_VolumeNotification_notify (DBusGProxy *proxy, const gint IN_volume, GError **error)
+uk_ac_cam_db538_VolumeNotification_notify (DBusGProxy *proxy, const gint IN_volume, const gboolean IN_muted, GError **error)
 
 {
-  return dbus_g_proxy_call (proxy, "notify", error, G_TYPE_INT, IN_volume, G_TYPE_INVALID, G_TYPE_INVALID);
+  return dbus_g_proxy_call (proxy, "notify", error, G_TYPE_INT, IN_volume, G_TYPE_BOOLEAN, IN_muted, G_TYPE_INVALID, G_TYPE_INVALID);
 }
 
 typedef void (*uk_ac_cam_db538_VolumeNotification_notify_reply) (DBusGProxy *proxy, GError *error, gpointer userdata);
@@ -49,14 +49,14 @@ static
 inline
 #endif
 DBusGProxyCall*
-uk_ac_cam_db538_VolumeNotification_notify_async (DBusGProxy *proxy, const gint IN_volume, uk_ac_cam_db538_VolumeNotification_notify_reply callback, gpointer userdata)
+uk_ac_cam_db538_VolumeNotification_notify_async (DBusGProxy *proxy, const gint IN_volume, const gboolean IN_muted, uk_ac_cam_db538_VolumeNotification_notify_reply callback, gpointer userdata)
 
 {
   DBusGAsyncData *stuff;
   stuff = g_slice_new (DBusGAsyncData);
   stuff->cb = G_CALLBACK (callback);
   stuff->userdata = userdata;
-  return dbus_g_proxy_begin_call (proxy, "notify", uk_ac_cam_db538_VolumeNotification_notify_async_callback, stuff, _dbus_glib_async_data_free, G_TYPE_INT, IN_volume, G_TYPE_INVALID);
+  return dbus_g_proxy_begin_call (proxy, "notify", uk_ac_cam_db538_VolumeNotification_notify_async_callback, stuff, _dbus_glib_async_data_free, G_TYPE_INT, IN_volume, G_TYPE_BOOLEAN, IN_muted, G_TYPE_INVALID);
 }
 #endif /* defined DBUS_GLIB_CLIENT_WRAPPERS_uk_ac_cam_db538_VolumeNotification */
 
