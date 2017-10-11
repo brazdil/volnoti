@@ -28,11 +28,12 @@
 #include "value-client-stub.h"
 
 static void print_usage(const char* filename, int failure) {
-    g_print("Usage: %s [-v] [-m] <volume>\n"
+    g_print("Usage: %s [-v] [-m] <value>\n"
             " -h\t--help\t\thelp\n"
             " -v\t--verbose\tverbose\n"
             " -m\t--mute\t\tmuted\n"
-            " <volume>\t\tint 0-100\n", filename);
+            " -b\t--brightness\t\tdisplay brightness\n"
+            " <value>\t\tint 0-100\n", filename);
     if (failure)
         exit(EXIT_FAILURE);
     else
@@ -43,10 +44,12 @@ int main(int argc, const char* argv[]) {
     void *options = gopt_sort(&argc, argv, gopt_start(
             gopt_option('h', 0, gopt_shorts('h', '?'), gopt_longs("help", "HELP")),
             gopt_option('m', 0, gopt_shorts('m'), gopt_longs("mute")),
+            gopt_option('b', 0, gopt_shorts('b'), gopt_longs("brightness")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
     int help = gopt(options, 'h');
     int debug = gopt(options, 'v');
     int muted = gopt(options, 'm');
+    int brightness = gopt(options, 'b');
     gopt_free(options);
 
     if (help)
@@ -105,7 +108,7 @@ int main(int argc, const char* argv[]) {
     print_debug_ok(debug);
 
     print_debug("Sending volume...", debug);
-    uk_ac_cam_db538_VolumeNotification_notify(proxy, volume, muted, &error);
+    uk_ac_cam_db538_VolumeNotification_notify(proxy, volume, muted, brightness, &error);
     if (error !=  NULL) {
         handle_error("Failed to send notification", error->message, FALSE);
         g_clear_error(&error);

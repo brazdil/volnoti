@@ -5,6 +5,7 @@
     <method name="notify">
       <arg type="i" name="volume" direction="in" />
       <arg type="b" name="muted" direction="in" />
+      <arg type="b" name="brightness" direction="in" />
     </method>
   </interface>
 </node>

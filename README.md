@@ -90,6 +90,10 @@ muted sound, call:
     
     $ volnoti-show -m
     
+To show a notification for brightness level 50%, call:
+
+    $ volnoti-show -b 50
+
 The best way to do this is to create simple script and attach it to 
 the hot-keys on your keyboard. But this depends on your window manager
 and system configuration.
