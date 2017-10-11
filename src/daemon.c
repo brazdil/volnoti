@@ -32,6 +32,7 @@ typedef struct {
 
     gint volume;
     gboolean muted;
+    gboolean brightness;
 
     GtkWindow *notification;
 
@@ -40,6 +41,7 @@ typedef struct {
     GdkPixbuf *icon_low;
     GdkPixbuf *icon_off;
     GdkPixbuf *icon_muted;
+    GdkPixbuf *icon_brightness;
 
     GdkPixbuf *image_progressbar_empty;
     GdkPixbuf *image_progressbar_full;
@@ -61,6 +63,7 @@ GType volume_object_get_type(void);
 gboolean volume_object_notify(VolumeObject* obj,
                               gint value_in,
                               gboolean muted,
+                              gboolean brightness,
                               GError** error);
 
 #define VOLUME_TYPE_OBJECT \
@@ -118,6 +121,7 @@ time_handler(VolumeObject *obj)
 gboolean volume_object_notify(VolumeObject* obj,
                               gint value,
                               gboolean muted,
+                              gboolean brightness,
                               GError** error) {
     g_assert(obj != NULL);
 
@@ -126,6 +130,7 @@ gboolean volume_object_notify(VolumeObject* obj,
     } else {
         obj->muted = FALSE;
     }
+    obj->brightness = brightness ? TRUE : FALSE;
     obj->volume = (value > 100) ? 100 : value;
 
     if (obj->notification == NULL) {
@@ -137,7 +142,9 @@ gboolean volume_object_notify(VolumeObject* obj,
     }
 
     // choose icon
-    if (obj->muted)
+    if (obj->brightness)
+        set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_brightness);
+    else if (obj->muted)
         set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
     else if (obj->volume >= 75)
         set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_high);
@@ -304,6 +311,9 @@ int main(int argc, char* argv[]) {
     status->icon_muted = gdk_pixbuf_new_from_file(IMAGE_PATH "volume_muted.svg", &error);
     if (error != NULL)
         handle_error("Couldn't load volume_muted.svg.", error->message, TRUE);
+    status->icon_brightness = gdk_pixbuf_new_from_file(IMAGE_PATH "brightness.svg", &error);
+    if (error != NULL)
+        handle_error("Couldn't load brightness.svg.", error->message, TRUE);
 
     // progress bar
     status->image_progressbar_empty = gdk_pixbuf_new_from_file(IMAGE_PATH "progressbar_empty.png", &error);
