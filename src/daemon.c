@@ -32,6 +32,8 @@ typedef struct {
 
     gint volume;
     gboolean muted;
+    gboolean micmuted;
+    gboolean micunmuted;
 
     GtkWindow *notification;
 
@@ -40,6 +42,8 @@ typedef struct {
     GdkPixbuf *icon_low;
     GdkPixbuf *icon_off;
     GdkPixbuf *icon_muted;
+    GdkPixbuf *icon_micon;
+    GdkPixbuf *icon_micmuted;
 
     GdkPixbuf *image_progressbar_empty;
     GdkPixbuf *image_progressbar_full;
@@ -60,7 +64,7 @@ typedef struct {
 GType volume_object_get_type(void);
 gboolean volume_object_notify(VolumeObject* obj,
                               gint value_in,
-                              gboolean muted,
+                              int muted,
                               GError** error);
 
 #define VOLUME_TYPE_OBJECT \
@@ -117,15 +121,28 @@ time_handler(VolumeObject *obj)
 
 gboolean volume_object_notify(VolumeObject* obj,
                               gint value,
-                              gboolean muted,
+                              int muted,
                               GError** error) {
     g_assert(obj != NULL);
 
-    if (muted) {
-        obj->muted = TRUE;
+    if (muted == VOL_MUTED) {
+      obj->muted = TRUE;
+      obj->micmuted = FALSE;
+      obj->micunmuted = FALSE;
+    } else if ( muted == MIC_MUTED ) {
+      obj->muted = FALSE;
+      obj->micunmuted = FALSE;
+      obj->micmuted = TRUE;
+    } else if ( muted == MIC_UNMUTED ) {
+      obj->muted = FALSE;
+      obj->micunmuted = TRUE;
+      obj->micmuted = FALSE;
     } else {
-        obj->muted = FALSE;
+      obj->muted = FALSE;
+      obj->micmuted = FALSE;
+      obj->micunmuted = FALSE;
     }
+  
     obj->volume = (value > 100) ? 100 : value;
 
     if (obj->notification == NULL) {
@@ -139,14 +156,18 @@ gboolean volume_object_notify(VolumeObject* obj,
     // choose icon
     if (obj->muted)
         set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_muted);
+    else if (obj->micmuted)
+      set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_micmuted);
+    else if (obj->micunmuted)
+      set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_micon);
     else if (obj->volume >= 75)
-        set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_high);
+      set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_high);
     else if (obj->volume >= 50)
-        set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_medium);
+      set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_medium);
     else if (obj->volume >= 25)
-        set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_low);
+      set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_low);
     else
-        set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_off);
+      set_notification_icon(GTK_WINDOW(obj->notification), obj->icon_off);
 
     // prepare and set progress bar
     gint width_full = obj->width_progressbar * obj->volume / 100;
@@ -304,7 +325,13 @@ int main(int argc, char* argv[]) {
     status->icon_muted = gdk_pixbuf_new_from_file(IMAGE_PATH "volume_muted.svg", &error);
     if (error != NULL)
         handle_error("Couldn't load volume_muted.svg.", error->message, TRUE);
-
+    status->icon_micmuted = gdk_pixbuf_new_from_file(IMAGE_PATH "mic_muted.svg", &error);
+    if (error != NULL)
+        handle_error("Couldn't load mic_muted.svg.", error->message, TRUE);
+    status->icon_micon = gdk_pixbuf_new_from_file(IMAGE_PATH "mic_on.svg", &error);
+    if (error != NULL)
+        handle_error("Couldn't load mic_on.svg.", error->message, TRUE);
+    
     // progress bar
     status->image_progressbar_empty = gdk_pixbuf_new_from_file(IMAGE_PATH "progressbar_empty.png", &error);
     if (error != NULL)

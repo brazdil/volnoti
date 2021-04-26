@@ -4,7 +4,7 @@
   <interface name="uk.ac.cam.db538.VolumeNotification">
     <method name="notify">
       <arg type="i" name="volume" direction="in" />
-      <arg type="b" name="muted" direction="in" />
+      <arg type="i" name="muted" direction="in" />
     </method>
   </interface>
 </node>
